@@ -5,3 +5,7 @@ dist/
 .DS_Store
 Thumbs.db
 .vscode/
+
+# Local documentation ignored from Git
+docs/er-diagram.md
+*Challenge*.md
