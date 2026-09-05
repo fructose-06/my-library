@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: unilib_postgres
+    environment:
+      POSTGRES_USER: unilib
+      POSTGRES_PASSWORD: unilib_password
+      POSTGRES_DB: unilib_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - unilib_pgdata:/var/lib/postgresql/data
+      - ./back-end/src/infrastructure/database/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U unilib -d unilib_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./back-end
+      dockerfile: Dockerfile
+    container_name: unilib_api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://unilib:unilib_password@postgres:5432/unilib_db
+      JWT_SECRET: super-secret-unilib-jwt-key-for-production-change-me
+      DEFAULT_TIMEZONE: Asia/Bangkok
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+volumes:
+  unilib_pgdata:
