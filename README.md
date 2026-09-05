@@ -274,5 +274,4 @@ npm run test:concurrency
 
 ## 7. ฐานข้อมูลและ ER Diagram
 
-* รายละเอียด Database Design และความสัมพันธ์: [docs/er-diagram.md](file:///c:/Users/fruct/Desktop/library/docs/er-diagram.md)
 * SQL Schema Migration Script: [001_initial_schema.sql](file:///c:/Users/fruct/Desktop/library/src/infrastructure/database/migrations/001_initial_schema.sql)
