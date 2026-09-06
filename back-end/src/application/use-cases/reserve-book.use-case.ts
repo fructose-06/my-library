@@ -6,7 +6,7 @@ import { ReservationRepository } from '../../infrastructure/repositories/reserva
 import { FineLedgerRepository } from '../../infrastructure/repositories/fine-ledger.repository.js';
 import { AuditLogRepository } from '../../infrastructure/repositories/audit-log.repository.js';
 import { DomainErrors } from '../../domain/errors/domain-error.js';
-import { RULES, UserStatus } from '../../domain/constants/rules.js';
+import { RULES, UserStatus, UserRole } from '../../domain/constants/rules.js';
 
 export interface ReserveBookInput {
   userId: string;
@@ -38,6 +38,10 @@ export class ReserveBookUseCase {
       }
       if (user.status !== UserStatus.ACTIVE) {
         throw DomainErrors.USER_DISABLED();
+      }
+      // Only STUDENT and LECTURER are permitted to reserve books (Section 5 & 45)
+      if (user.role !== UserRole.STUDENT && user.role !== UserRole.LECTURER) {
+        throw DomainErrors.FORBIDDEN('Only students and lecturers are permitted to reserve books');
       }
 
       const book = await this.bookRepo.findById(input.bookId, client);

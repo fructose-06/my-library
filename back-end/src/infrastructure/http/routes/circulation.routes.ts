@@ -42,13 +42,22 @@ export async function circulationRoutes(
       const body = request.body as any;
       const currentUser = getAuthUser(request);
 
+      // Separation of Duties: Admin cannot borrow books
+      if (currentUser.role === UserRole.ADMIN) {
+        throw DomainErrors.FORBIDDEN('Administrators are not permitted to borrow books');
+      }
+
       let targetBorrowerId = currentUser.id;
-      if (body.borrower_id) {
-        // Only Librarian or Admin can borrow on behalf of another user
-        if (currentUser.role !== UserRole.LIBRARIAN && currentUser.role !== UserRole.ADMIN) {
-          throw DomainErrors.FORBIDDEN('Cannot borrow on behalf of another user');
+      if (currentUser.role === UserRole.LIBRARIAN) {
+        if (!body.borrower_id) {
+          throw DomainErrors.FORBIDDEN('Librarians cannot borrow books for themselves. Please specify borrower_id to borrow on behalf of a student or lecturer');
         }
         targetBorrowerId = body.borrower_id;
+      } else {
+        // Students and Lecturers cannot borrow on behalf of others
+        if (body.borrower_id && body.borrower_id !== currentUser.id) {
+          throw DomainErrors.FORBIDDEN('Cannot borrow on behalf of another user');
+        }
       }
 
       const loan = await borrowUseCase.execute({
@@ -70,7 +79,7 @@ export async function circulationRoutes(
   fastify.post(
     '/return',
     {
-      preHandler: [authenticate, authorize([UserRole.LIBRARIAN, UserRole.ADMIN])],
+      preHandler: [authenticate, authorize([UserRole.LIBRARIAN])],
       schema: {
         description: 'Process physical copy return and inspect condition (Librarian only)',
         tags: ['Circulation'],

@@ -274,4 +274,5 @@ npm run test:concurrency
 
 ## 7. ฐานข้อมูลและ ER Diagram
 
-* SQL Schema Migration Script: [001_initial_schema.sql](file:///c:/Users/fruct/Desktop/library/src/infrastructure/database/migrations/001_initial_schema.sql)
+* Peter Chen Conceptual ER Diagram (Draw.io): [docs/chen-er-diagram.md](file:///c:/Users/fruct/Desktop/library/docs/chen-er-diagram.md)
+* SQL Schema Migration Script: [001_initial_schema.sql](file:///c:/Users/fruct/Desktop/library/back-end/src/infrastructure/database/migrations/001_initial_schema.sql)

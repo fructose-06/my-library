@@ -62,7 +62,7 @@ function renderLayout() {
           </button>
 
           ${
-            role === 'LIBRARIAN' || role === 'ADMIN'
+            role === 'LIBRARIAN'
               ? `
               <div class="nav-category">Staff Counter</div>
               <button class="nav-item ${store.currentView === 'librarian' ? 'active' : ''}" data-view="librarian">

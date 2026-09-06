@@ -10,6 +10,30 @@ export async function renderCirculationView(container: HTMLElement) {
       </div>
     </div>
 
+    ${
+      store.currentUser?.role === 'ADMIN'
+        ? `
+        <div style="background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: 1.5rem;">🛡️</span>
+          <div>
+            <div style="font-weight: 600; color: #93c5fd;">System Administrator Account (Separation of Duties)</div>
+            <div style="font-size: 0.85rem; color: var(--text-secondary);">Administrators manage system security, user accounts, audit logs, and fine waivers. Direct book borrowing is reserved for Student and Lecturer roles.</div>
+          </div>
+        </div>
+        `
+        : store.currentUser?.role === 'LIBRARIAN'
+        ? `
+        <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: 1.5rem;">📚</span>
+          <div>
+            <div style="font-weight: 600; color: #6ee7b7;">Librarian Staff Account (Circulation Service)</div>
+            <div style="font-size: 0.85rem; color: var(--text-secondary);">Librarians process borrowing and returns for students and lecturers at the Librarian Desk. Direct personal borrowing is reserved for Student and Lecturer roles.</div>
+          </div>
+        </div>
+        `
+        : ''
+    }
+
     <!-- Active Loans Section -->
     <div class="glass-panel">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">

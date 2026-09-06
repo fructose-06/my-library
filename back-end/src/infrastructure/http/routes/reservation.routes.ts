@@ -37,6 +37,10 @@ export async function reservationRoutes(
       const { book_id } = request.body as any;
       const currentUser = getAuthUser(request);
 
+      if (currentUser.role !== UserRole.STUDENT && currentUser.role !== UserRole.LECTURER) {
+        throw DomainErrors.FORBIDDEN('Only students and lecturers are permitted to reserve books');
+      }
+
       const reservation = await reserveUseCase.execute({
         userId: currentUser.id,
         bookId: book_id,

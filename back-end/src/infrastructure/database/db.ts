@@ -1,5 +1,5 @@
 import pg from 'pg';
-import { newDb, IMemoryDb } from 'pg-mem';
+import type { IMemoryDb } from 'pg-mem';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -56,10 +56,12 @@ class PostgresDatabaseClient implements IDatabaseClient {
 }
 
 class InMemoryPostgresClient implements IDatabaseClient {
-  private memDb: IMemoryDb;
+  private memDb!: IMemoryDb;
   private pgAdapter: any;
+  private pool: any;
 
-  constructor() {
+  async initSchema(schemaSqlPath?: string): Promise<void> {
+    const { newDb } = await import('pg-mem');
     this.memDb = newDb();
     
     // Register custom PostgreSQL functions if needed
@@ -79,11 +81,7 @@ class InMemoryPostgresClient implements IDatabaseClient {
 
     this.pgAdapter = this.memDb.adapters.createPg();
     this.pool = new this.pgAdapter.Pool();
-  }
 
-  private pool: any;
-
-  async initSchema(schemaSqlPath?: string): Promise<void> {
     let migrationPath = schemaSqlPath || path.join(__dirname, 'migrations', '001_initial_schema.sql');
     if (!fs.existsSync(migrationPath)) {
       migrationPath = path.join(process.cwd(), 'src', 'infrastructure', 'database', 'migrations', '001_initial_schema.sql');

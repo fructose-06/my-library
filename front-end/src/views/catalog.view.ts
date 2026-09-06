@@ -92,7 +92,15 @@ export async function renderCatalogView(container: HTMLElement) {
               🔍 View Copies (${b.total_copies_count})
             </button>
             ${
-              isAvailable
+              store.currentUser?.role === 'ADMIN'
+                ? `<span style="font-size: 0.78rem; color: var(--text-muted); align-self: center; padding: 4px 8px; background: rgba(255,255,255,0.05); border-radius: 4px;">🛡️ Admin (Governance)</span>`
+                : store.currentUser?.role === 'LIBRARIAN'
+                ? (isAvailable
+                  ? `<button class="btn btn-primary btn-sm btn-borrow-book" data-book-id="${b.id}" data-book-title="${b.title}">
+                      ⚡ Borrow on Behalf
+                     </button>`
+                  : `<span style="font-size: 0.78rem; color: var(--text-muted); align-self: center; padding: 4px 8px;">⏳ All Copies On Loan</span>`)
+                : isAvailable
                 ? `<button class="btn btn-primary btn-sm btn-borrow-book" data-book-id="${b.id}" data-book-title="${b.title}">
                     ⚡ Borrow
                    </button>`
@@ -226,7 +234,9 @@ export async function renderCatalogView(container: HTMLElement) {
                     <td><span class="status-pill ${statusClass}">${cp.status}</span></td>
                     <td>
                       ${
-                        canBorrow
+                        store.currentUser?.role === 'ADMIN'
+                          ? `<span style="color: var(--text-muted); font-size: 0.8rem;">-</span>`
+                          : canBorrow
                           ? `<button class="btn btn-primary btn-sm btn-borrow-copy" data-barcode="${cp.barcode}">Borrow</button>`
                           : `<span style="color: var(--text-muted); font-size: 0.8rem;">-</span>`
                       }
@@ -330,11 +340,12 @@ export async function renderCatalogView(container: HTMLElement) {
           </select>
         </div>
         ${
-          store.currentUser?.role === 'LIBRARIAN' || store.currentUser?.role === 'ADMIN'
+          store.currentUser?.role === 'LIBRARIAN'
             ? `
             <div class="form-group">
-              <label>Borrow on behalf of Borrower ID (Optional)</label>
-              <input type="text" name="borrower_id" placeholder="User ID or leave empty for yourself" />
+              <label>Borrower ID (Student or Lecturer) *</label>
+              <input type="text" name="borrower_id" placeholder="e.g. usr-stu-01 or 65010001" required style="width: 100%; padding: 10px 14px; background: rgba(10,15,26,0.8); border: 1px solid var(--border-glass); border-radius: 8px; color: #fff;" />
+              <small style="color: var(--text-muted); font-size: 0.78rem; display: block; margin-top: 4px;">Librarians process circulation on behalf of students or lecturers only.</small>
             </div>
             `
             : ''

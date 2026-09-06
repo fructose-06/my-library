@@ -7,7 +7,7 @@ import { ReservationRepository } from '../../infrastructure/repositories/reserva
 import { FineLedgerRepository } from '../../infrastructure/repositories/fine-ledger.repository.js';
 import { AuditLogRepository } from '../../infrastructure/repositories/audit-log.repository.js';
 import { DomainErrors } from '../../domain/errors/domain-error.js';
-import { CopyStatus, RULES, UserStatus } from '../../domain/constants/rules.js';
+import { CopyStatus, RULES, UserStatus, UserRole } from '../../domain/constants/rules.js';
 
 export interface BorrowBookInput {
   borrowerId: string;
@@ -41,6 +41,10 @@ export class BorrowBookUseCase {
       }
       if (borrower.status !== UserStatus.ACTIVE) {
         throw DomainErrors.USER_DISABLED();
+      }
+      // Only STUDENT and LECTURER are permitted to hold book loans (Section 5 & 42)
+      if (borrower.role !== UserRole.STUDENT && borrower.role !== UserRole.LECTURER) {
+        throw DomainErrors.FORBIDDEN('Only students and lecturers are permitted to borrow books');
       }
 
       // 2. Check active loans limit (capped at 5)

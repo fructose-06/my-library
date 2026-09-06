@@ -103,4 +103,79 @@ describe('UniLib Core — API Integration & E2E Tests', () => {
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body.data)).toBe(true);
   });
+
+  it('POST /api/circulation/borrow rejects Admin trying to borrow on behalf of user with 403 Forbidden', async () => {
+    const res = await request(app.server)
+      .post('/api/circulation/borrow')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ barcode: 'CA-000002', borrower_id: 'usr-stu-01' });
+
+    expect(res.status).toBe(403);
+    expect(res.body.success).toBe(false);
+  });
+
+  it('POST /api/circulation/return rejects Admin with 403 Forbidden', async () => {
+    const res = await request(app.server)
+      .post('/api/circulation/return')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ loan_id: 'loan-sample-01' });
+
+    expect(res.status).toBe(403);
+    expect(res.body.success).toBe(false);
+  });
+
+  it('POST /api/circulation/borrow rejects Admin trying to borrow directly for themselves with 403 Forbidden', async () => {
+    const res = await request(app.server)
+      .post('/api/circulation/borrow')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ barcode: 'CA-000003' });
+
+    expect(res.status).toBe(403);
+    expect(res.body.success).toBe(false);
+    expect(res.body.error.message).toContain('Administrators are not permitted to borrow books');
+  });
+
+  it('POST /api/reservations rejects Admin trying to reserve books with 403 Forbidden', async () => {
+    const res = await request(app.server)
+      .post('/api/reservations')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ book_id: 'book-clean-arch' });
+
+    expect(res.status).toBe(403);
+    expect(res.body.success).toBe(false);
+    expect(res.body.error.message).toContain('Only students and lecturers are permitted to reserve books');
+  });
+
+  it('POST /api/circulation/borrow rejects Librarian trying to borrow for themselves without borrower_id with 403 Forbidden', async () => {
+    const res = await request(app.server)
+      .post('/api/circulation/borrow')
+      .set('Authorization', `Bearer ${librarianToken}`)
+      .send({ barcode: 'CA-000003' });
+
+    expect(res.status).toBe(403);
+    expect(res.body.success).toBe(false);
+    expect(res.body.error.message).toContain('Librarians cannot borrow books for themselves');
+  });
+
+  it('POST /api/reservations rejects Librarian trying to reserve books with 403 Forbidden', async () => {
+    const res = await request(app.server)
+      .post('/api/reservations')
+      .set('Authorization', `Bearer ${librarianToken}`)
+      .send({ book_id: 'book-clean-arch' });
+
+    expect(res.status).toBe(403);
+    expect(res.body.success).toBe(false);
+    expect(res.body.error.message).toContain('Only students and lecturers are permitted to reserve books');
+  });
+
+  it('POST /api/circulation/borrow allows Librarian to borrow on behalf of a student', async () => {
+    const res = await request(app.server)
+      .post('/api/circulation/borrow')
+      .set('Authorization', `Bearer ${librarianToken}`)
+      .send({ barcode: 'CA-000002', borrower_id: 'usr-stu-02' });
+
+    expect(res.status).toBe(201);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.user_id).toBe('usr-stu-02');
+  });
 });
